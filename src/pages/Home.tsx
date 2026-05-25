@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Coffee, Heart, Award, Star } from 'lucide-react';
-import { supabase, MenuItem, Testimonial } from '../lib/supabase';
+import { MenuItem, Testimonial, fetchFeaturedItems, fetchTestimonials } from '../lib/supabase';
 
 export default function Home() {
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
@@ -14,18 +14,12 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      const { data: menuData } = await supabase
-        .from('menu_items')
-        .select('*')
-        .limit(3);
-
-      const { data: testimonialsData } = await supabase
-        .from('testimonials')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (menuData) setFeaturedItems(menuData);
-      if (testimonialsData) setTestimonials(testimonialsData);
+      const [menuData, testimonialsData] = await Promise.all([
+        fetchFeaturedItems(3),
+        fetchTestimonials(),
+      ]);
+      setFeaturedItems(menuData);
+      setTestimonials(testimonialsData);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase, MenuItem } from '../lib/supabase';
+import { MenuItem, fetchMenuItems } from '../lib/supabase';
 
 export default function Menu() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -9,17 +9,13 @@ export default function Menu() {
   const categories = ['All', 'Coffee', 'Tea', 'Desserts', 'Snacks'];
 
   useEffect(() => {
-    fetchMenuItems();
+    loadMenuItems();
   }, []);
 
-  const fetchMenuItems = async () => {
+  const loadMenuItems = async () => {
     try {
-      const { data } = await supabase
-        .from('menu_items')
-        .select('*')
-        .order('category', { ascending: true });
-
-      if (data) setMenuItems(data);
+      const data = await fetchMenuItems();
+      setMenuItems(data);
     } catch (error) {
       console.error('Error fetching menu items:', error);
     } finally {
